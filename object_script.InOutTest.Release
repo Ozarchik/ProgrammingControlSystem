@@ -1,0 +1,12 @@
+release/DynamicAnalogModel.o
+release/DynamicDiscreteModel.o
+release/gain.o
+release/integrator.o
+release/statespace.o
+release/StaticDiscreteModel.o
+release/system.o
+release/main.o
+release/qcustomplot.o
+release/widget.o
+release/moc_qcustomplot.o
+release/moc_widget.o

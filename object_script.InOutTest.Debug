@@ -1,0 +1,12 @@
+debug/DynamicAnalogModel.o
+debug/DynamicDiscreteModel.o
+debug/gain.o
+debug/integrator.o
+debug/statespace.o
+debug/StaticDiscreteModel.o
+debug/system.o
+debug/main.o
+debug/qcustomplot.o
+debug/widget.o
+debug/moc_qcustomplot.o
+debug/moc_widget.o
