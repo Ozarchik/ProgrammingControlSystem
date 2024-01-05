@@ -12,27 +12,12 @@ StateSpace::StateSpace(std::vector<float> &m_initial_conditions,
 
     m_matrix_A.resize(3);
 
+    for(uint64_t i = 0; i != matrix_A.size(); ++i){  m_matrix_A[i].resize(3); }
     for(uint64_t i = 0; i != matrix_A.size(); ++i){
-        m_matrix_A[i].resize(3);
-    }
-
-    for(uint64_t i = 0; i != matrix_A.size(); ++i){
-        for(uint64_t j = 0; j != matrix_A[i].size(); ++j){
-            m_matrix_A[i][j] = matrix_A[i][j];
-        }
-    }
-
-    for(uint64_t i = 0; i != matrix_B.size(); ++i){
-        m_matrix_B.push_back(matrix_B[i]);
-    }
-
-    for(uint64_t i = 0; i != matrix_C.size(); ++i){
-        m_matrix_C.push_back(matrix_C[i]);
-    }
-
-    for(uint64_t i = 0; i != matrix_D.size(); ++i){
-        m_matrix_D.push_back(matrix_D[i]);
-    }
+        for(uint64_t j = 0; j != matrix_A[i].size(); ++j){ m_matrix_A[i][j] = matrix_A[i][j]; }}
+    for(uint64_t i = 0; i != matrix_B.size(); ++i){ m_matrix_B.push_back(matrix_B[i]); }
+    for(uint64_t i = 0; i != matrix_C.size(); ++i){ m_matrix_C.push_back(matrix_C[i]);}
+    for(uint64_t i = 0; i != matrix_D.size(); ++i){ m_matrix_D.push_back(matrix_D[i]); }
 
 }
 

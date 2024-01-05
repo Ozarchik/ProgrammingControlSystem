@@ -24,21 +24,6 @@ class Widget : public QWidget
 
 public:
 
-    enum SIMULATE_MODE {
-        STATE_SPACE,
-        INTEGRATOR,
-
-        STATIC_DISCRETE_MODEL_1,
-        STATIC_DISCRETE_MODEL_2,
-        STATIC_DISCRETE_MODEL_3,
-
-        DYNAMIC_DISCRETE_MODEL_1,
-        DYNAMIC_DISCRETE_MODEL_2,
-        DYNAMIC_DISCRETE_MODEL_3,
-
-        DYNAMIC_ANALOG_MODEL,
-        STATIC_ANALOG_MODEL
-    };
 
     explicit Widget(QWidget *parent = 0);
     ~Widget();
@@ -96,7 +81,23 @@ private:
 
     // System* system;
 
-    SIMULATE_MODE mode = DYNAMIC_ANALOG_MODEL;
+    enum SIMULATE_MODE {
+        STATE_SPACE,
+        INTEGRATOR,
+
+        STATIC_DISCRETE_MODEL_1,
+        STATIC_DISCRETE_MODEL_2,
+        STATIC_DISCRETE_MODEL_3,
+
+        DYNAMIC_DISCRETE_MODEL_1,
+        DYNAMIC_DISCRETE_MODEL_2,
+        DYNAMIC_DISCRETE_MODEL_3,
+
+        DYNAMIC_ANALOG_MODEL,
+        STATIC_ANALOG_MODEL
+    };
+
+    SIMULATE_MODE mode;
 
 
 

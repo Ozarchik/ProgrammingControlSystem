@@ -5,16 +5,14 @@
 #include <QSizePolicy>
 #include <QDebug>
 
+// Длительность симуляции
+#define END_OF_TIME 50
 
-// --------------------------
-// Set stop time here
-// --------------------------
-#define ENDOFTIME 25
-#define SAMPLINGTIMEMSEC 10
-
-// --------------------------
-// Set stop time here
-// --------------------------
+// Шаг дискретизации
+#define SAMPLING_TIME_MSEC 10
+// 200 мс - 5 Гц
+//  33 мс - 30 Гц
+//  10 мс - 100 Гц
 
 typedef std::vector<float> vec;
 typedef std::vector<std::vector<float>> mat;
@@ -31,7 +29,7 @@ Widget::Widget(QWidget *parent) :
 	}
 
     // Set window size
-	this->setMinimumSize(640, 480);
+    this->setMinimumSize(1600, 800);
 
 
     // Add main layout with two plots
@@ -81,15 +79,22 @@ Widget::Widget(QWidget *parent) :
     inputPlot->yAxis->setLabel("input");
     outputPlot->xAxis->setLabel("t");
     outputPlot->yAxis->setLabel("output");
+    inputPlot->xAxis->setRange(0, END_OF_TIME);
+    outputPlot->xAxis->setRange(0, END_OF_TIME);
 
-    // --------------------------
-    // Change ranges if you need
-    // --------------------------
-    // Set axes ranges so see all data:
-    inputPlot->xAxis->setRange(0, ENDOFTIME);
-    inputPlot->yAxis->setRange(-1.2, 1.2);
-    outputPlot->xAxis->setRange(0, ENDOFTIME);
-    outputPlot->yAxis->setRange(-1.2, 1.2);
+    // ********************************************************
+    // **************** Для динамической модели ***************
+    // ********************************************************
+    inputPlot->yAxis->setRange(-1.25, 1.25);
+    outputPlot->yAxis->setRange(-1.25, 1.25);
+
+
+    // ********************************************************
+    // **************** Для статической модели ****************
+    // ********************************************************
+    // inputPlot ->yAxis->setRange(9, 21);
+    // outputPlot->yAxis->setRange(9, 21);
+
 
     initStateSpace();
     initDynamicAnalogModel();
@@ -110,7 +115,7 @@ Widget::Widget(QWidget *parent) :
     // --------------------------
     // Set sampling time here
     // --------------------------
-    timer->setInterval(SAMPLINGTIMEMSEC);
+    timer->setInterval(SAMPLING_TIME_MSEC);
     // --------------------------
     // Set sampling time here
     // --------------------------
@@ -141,13 +146,12 @@ Widget::~Widget()
     delete stateSpace;
 }
 
+
+// ------------------------------------------------
+// | [1] STATE SPACE                              |
+// ------------------------------------------------
 void Widget::initStateSpace()
 {
-
-    // ------------------------------------------------
-    // | [1] STATE SPACE                              |
-    // ------------------------------------------------
-
     vec initConditions {0.0, 0.0, 0.0};
     mat A {{-4, -4, -1},{1, 0, 0},{0, 1, 0}};
     vec B {1, 0, 0};
@@ -158,95 +162,103 @@ void Widget::initStateSpace()
 
 
 
+// ------------------------------------------------
+// | [2] STATIC DISCRETE MODEL - 1                |
+// ------------------------------------------------
 void Widget::initStaticDiscreteModel1()
 {
-    // ------------------------------------------------
-    // | [2] STATIC DISCRETE MODEL - 1                |
-    // ------------------------------------------------
-
     vec initConditions {0.0, 0.0, 0.0};
-    mat A{{0.4013, -0.5514, -0.1340},{0.1340, 0.9374, -0.0154},{0.0154, 0.1956, 0.9989}};
-    vec B {0.1340, 0.0154, 0.0011};
+    mat A{{0.401298, -0.551447, -0.134015},
+          {0.134015,  0.937360, -0.015385},
+          {0.015385,  0.195559,  0.998904}};
+    vec B {0.134015,  0.015386,  0.001096};
     vec C {0, 0, 1};
     vec D {1};
     staticDiscreteModel1 = new StaticDiscreteModel(initConditions, A, B, C, D);
 }
 
+
+// ------------------------------------------------
+// | [3] STATIC DISCRETE MODEL - 2                |
+// ------------------------------------------------
 void Widget::initStaticDiscreteModel2()
 {
-    // ------------------------------------------------
-    // | [3] STATIC DISCRETE MODEL - 2                |
-    // ------------------------------------------------
-
     vec initConditions {0.0, 0.0, 0.0};
-    mat A{{0.8731, -0.1253, -0.0312},{0.0312, 0.9979, -0.0005},{0.0005, 0.0333, 1.0000}};
-    vec B {0.0312, 0.0005, 0.0006};
+    mat A{{0.873134, -0.125265, -0.031183},
+          {0.031183,  0.997868, -0.000531},
+          {0.000531,  0.033309,  0.999994}};
+    vec B {0.031183,  0.000531,  0.0000059};
     vec C {0, 0, 1};
     vec D {1};
     staticDiscreteModel2 = new StaticDiscreteModel(initConditions, A, B, C, D);
 }
 
+
+// ------------------------------------------------
+// | [4] STATIC DISCRETE MODEL - 3                |
+// ------------------------------------------------
 void Widget::initStaticDiscreteModel3()
 {
-    // ------------------------------------------------
-    // | [4] STATIC DISCRETE MODEL - 3                |
-    // ------------------------------------------------
 
     vec initConditions {0.0, 0.0, 0.0};
-    mat A{{0.9606, -0.0393, -0.0098},{0.0098, 0.9998, -0.00005},{0.00005, 0.0100, 1.0000}};
-    vec B {0.3252, 0.0349, 0.0024};
+    mat A{{0.960594, -0.039257, -0.009801},
+          {0.009801, 0.999802, -0.000049},
+          {0.000049, 0.009999, 0.999999}};
+    vec B {0.0098019, 0.0000493, 0.0000001};
     vec C {0, 0, 1};
     vec D {1};
     staticDiscreteModel3 = new StaticDiscreteModel(initConditions, A, B, C, D);
 }
 
+
+// ------------------------------------------------
+// | [5] DYNAMIC DISCRETE MODEL - 1               |
+// ------------------------------------------------
 void Widget::initDynamicDiscreteModel1()
 {
-    // ------------------------------------------------
-    // | [5] DYNAMIC DISCRETE MODEL - 1               |
-    // ------------------------------------------------
-
     vec initConditions {1, 0};
-    mat A{{0.9950, 0.1997},{-0.0499, 0.9950}};
+    mat A{{0.995004, 0.199667},{-0.049917, 0.995004}};
     vec B {0, 0};
     vec C {1, 0};
     vec D {0};
     dynamicDiscreteModel1 = new DynamicDiscreteModel(initConditions, A, B, C, D);
 }
 
+
+// ------------------------------------------------
+// | [6] DYNAMIC DISCRETE MODEL - 2               |
+// ------------------------------------------------
 void Widget::initDynamicDiscreteModel2()
 {
-    // ------------------------------------------------
-    // | [6] DYNAMIC DISCRETE MODEL - 2               |
-    // ------------------------------------------------
-
     vec initConditions {1, 0};
-    mat A{{0.9999, 0.0333},{-0.0083, 0.9999}};
+    mat A{{0.99986, 0.033332},{-0.0083329, 0.99986}};
     vec B {0, 0};
     vec C {1, 0};
     vec D {0};
     dynamicDiscreteModel2 = new DynamicDiscreteModel(initConditions, A, B, C, D);
 }
 
+
+// ------------------------------------------------
+// | [7] DYNAMIC DISCRETE MODEL - 3               |
+// ------------------------------------------------
 void Widget::initDynamicDiscreteModel3()
 {
-    // ------------------------------------------------
-    // | [7] DYNAMIC DISCRETE MODEL - 3               |
-    // ------------------------------------------------
-
     vec initConditions {1, 0};
-    mat A{{1.0000, 0.0100},{-0.0025, 1.0000}};
+    mat A{{0.99999, 0.01},{-0.0025, 0.99999}};
     vec B {0, 0};
     vec C {1, 0};
     vec D {0};
     dynamicDiscreteModel3 = new DynamicDiscreteModel(initConditions, A, B, C, D);
 }
 
+
+// ------------------------------------------------
+// | [8] DYNAMIC ANALOG MODEL                     |
+// ------------------------------------------------
 void Widget::initDynamicAnalogModel()
 {
-    // ------------------------------------------------
-    // | [8] DYNAMIC ANALOG MODEL                     |
-    // ------------------------------------------------
+
 
     vec initConditions {1, 0};
     mat A{{0.0, 1.0},{-0.25, 0.0}};
@@ -286,70 +298,89 @@ void Widget::update() {
 	}
 
 
-    float signal_dt = static_cast<float>(dt/1000.0);
+    // float signal_dt = static_cast<float>(dt/1000.0);
+    float signal_dt = (static_cast<float>(dt)/1000.0);
     float outputSignal = 0.0;
 
+
+//  1. STATE_SPACE [no freq]
+//  3. STATIC_DISCRETE_MODEL  [1/2/3] [5 33 100] Hz
+//  3. DYNAMIC_DISCRETE_MODEL [1/2/3] [5 33 100] Hz
+//  4. DYNAMIC_ANALOG_MODEL           [5 33 100] Hz
+
+    mode = DYNAMIC_DISCRETE_MODEL_3;
+
     switch (mode) {
+    case INTEGRATOR: break;
+    case STATIC_ANALOG_MODEL: break;
 
     case STATE_SPACE:
         outputSignal = stateSpace->getOutput();
         stateSpace->update(signal, signal_dt);
-        break;
-
-    case INTEGRATOR:
-
-        break;
-
-    case STATIC_ANALOG_MODEL:
+        setInputPlot(relativeTime, signal);
+        setOutputPlot(relativeTime, outputSignal);
         break;
 
     case STATIC_DISCRETE_MODEL_1:
         outputSignal = staticDiscreteModel1->getOutput();
         staticDiscreteModel1->update(signal);
+        setInputPlot(relativeTime, signal);
+        setOutputPlot(relativeTime, outputSignal);
         break;
 
     case STATIC_DISCRETE_MODEL_2:
         outputSignal = staticDiscreteModel2->getOutput();
         staticDiscreteModel2->update(signal);
+        setInputPlot(relativeTime, signal);
+        setOutputPlot(relativeTime, outputSignal);
         break;
 
     case STATIC_DISCRETE_MODEL_3:
         outputSignal = staticDiscreteModel3->getOutput();
         staticDiscreteModel3->update(signal);
-        break;
-
-    case DYNAMIC_ANALOG_MODEL:
-        outputSignal = dynamicAnalogModel->getOutput();
-        dynamicAnalogModel->update(outputSignal, signal_dt);
+        setInputPlot(relativeTime, signal);
+        setOutputPlot(relativeTime, outputSignal);
         break;
 
     case DYNAMIC_DISCRETE_MODEL_1:
         outputSignal = dynamicDiscreteModel1->getOutput();
         dynamicDiscreteModel1->update(outputSignal);
+        setInputPlot(relativeTime, outputSignal);
+        setOutputPlot(relativeTime, outputSignal);
         break;
 
     case DYNAMIC_DISCRETE_MODEL_2:
         outputSignal = dynamicDiscreteModel2->getOutput();
         dynamicDiscreteModel2->update(outputSignal);
+        setInputPlot(relativeTime, outputSignal);
+        setOutputPlot(relativeTime, outputSignal);
         break;
 
     case DYNAMIC_DISCRETE_MODEL_3:
         outputSignal = dynamicDiscreteModel3->getOutput();
         dynamicDiscreteModel3->update(outputSignal);
+        setInputPlot(relativeTime, outputSignal);
+        setOutputPlot(relativeTime, outputSignal);
+        break;
+
+    case DYNAMIC_ANALOG_MODEL:
+        outputSignal = dynamicAnalogModel->getOutput();
+        dynamicAnalogModel->update(outputSignal, signal_dt);
+        setInputPlot(relativeTime, outputSignal);
+        setOutputPlot(relativeTime, outputSignal);
         break;
     }
 
 
 //    setInputPlot(relativeTime, signal);
-    setInputPlot(relativeTime, outputSignal);
-    setOutputPlot(relativeTime, outputSignal);
+
 
     // test integrator
     // m_integrator->update(signal, float(signal_dt));
     // setOutputPlot(relativeTime, m_integrator->state());
     // end test
 
-    if (relativeTime / 1000.0 > ENDOFTIME) {
+    if (relativeTime / 1000.0 > END_OF_TIME) {
         timer->blockSignals(true);
         timer->stop();
         timer->blockSignals(false);
